@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class BreadcrumbsView extends LinearLayout {
   int currentStep = 0;
   List<Step> steps;
   boolean animIsRunning;
+  private OnAnimationEndedListener mOnAnimationEndedListener;
 
   public BreadcrumbsView(Context context, int nSteps) {
     super(context);
@@ -97,6 +99,15 @@ public class BreadcrumbsView extends LinearLayout {
           @Override public void run() {
             currentStep++;
             animIsRunning = false;
+
+            if (mOnAnimationEndedListener != null) {
+              BreadcrumbsView.this.post(new Runnable() {
+                @Override
+                public void run() {
+                  mOnAnimationEndedListener.onAnimationEnded();
+                }
+              });
+            }
           }
         });
       }
@@ -126,6 +137,15 @@ public class BreadcrumbsView extends LinearLayout {
           @Override public void run() {
             currentStep--;
             animIsRunning = false;
+
+            if (mOnAnimationEndedListener != null) {
+              BreadcrumbsView.this.post(new Runnable() {
+                @Override
+                public void run() {
+                  mOnAnimationEndedListener.onAnimationEnded();
+                }
+              });
+            }
           }
         });
       }
@@ -183,6 +203,10 @@ public class BreadcrumbsView extends LinearLayout {
     }
   }
 
+  public void setOnAnimationEndedListener(OnAnimationEndedListener onAnimationEndedListener) {
+    mOnAnimationEndedListener = onAnimationEndedListener;
+  }
+
   private static class Step {
     private final SeparatorView separatorView;
     private final DotView dotView;
@@ -191,5 +215,9 @@ public class BreadcrumbsView extends LinearLayout {
       this.separatorView = separatorView;
       this.dotView = dotView;
     }
+  }
+
+  public interface OnAnimationEndedListener {
+    void onAnimationEnded();
   }
 }
